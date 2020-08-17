@@ -2,7 +2,6 @@
 #include <fstream>
 
 using namespace std;
-static string data_path = "./data/";
 
 bool doesUserExist (const string &possible_user, const string &op_user);
 bool doesTopicExist (const string &possible_topic, const string &op_user);
@@ -28,6 +27,8 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
     bool (*doesExist)(const string &, const string &);
     void (*addEntity)(const string &, const string &, const string &);
 
+    // Assign proper validator/addition functions to doesExist and addEntity
+    // Based on user's input
     if (entity == "user") {
         doesExist = &doesUserExist;
         addEntity = &addUser;
@@ -50,6 +51,7 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
     bool is_name_alpha, does_exist;
     entity[0] = toupper(entity[0]);
 
+    // Checks if topic or file name adheres to naming conventions and is not a duplicate
     if (name.size() >= 3 && (is_name_alpha = isNameAlpha(name)) && !(does_exist = doesExist(name, op_user)) ) {
 
         bool confirmed = getConfirmation(entity, name);
@@ -62,6 +64,7 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
 
     } else {
 
+        // Determines and notifies the user of the triggered error
         if (name.size() < 3) {
             cout << entity << " name has to be at least 3 characters long." << endl;
         } else if (!is_name_alpha) {
@@ -84,8 +87,8 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
 bool doesUserExist (const string &possible_user, const string &op_user) {
 
     ifstream users("./data/Users");
-
     string real_user;
+
     while (users >> real_user) {
         if (real_user == possible_user) {
             users.close();
@@ -262,7 +265,7 @@ void showFiles (const string &op_user) {
         name = file.substr(0, comma_pos);
         location = file.substr(comma_pos + 1);
 
-        cout << name << " -> " << location << endl;
+        cout << name << ": " << location << endl;
 
     }
 

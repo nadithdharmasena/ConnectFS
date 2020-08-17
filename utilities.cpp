@@ -3,6 +3,8 @@
 
 using namespace std;
 
+extern string data_path;
+
 /**
  * @description Tokenizes the user's shell input by space
  * @param input User's shell input
@@ -66,6 +68,7 @@ bool isNameAlpha (const string &name) {
  * @return True if user confirmed addition, false if not
  */
 bool getConfirmation (const string &message, const string &name) {
+
     cout << "Are you sure you want to add new " << message << " " << name << " (Y/N)? ";
 
     string response;
