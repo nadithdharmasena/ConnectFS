@@ -1,2 +1,2 @@
 # ConnectFS
-Graph-powered file organization system.
+Graph-powered temporary file organization system.

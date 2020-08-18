@@ -3,6 +3,9 @@
 
 using namespace std;
 
+typedef unordered_map<string, string> FileMap;
+
+void createEntity (const vector<string> &tokens, const string &op_user);
 bool doesUserExist (const string &possible_user, const string &op_user);
 bool doesTopicExist (const string &possible_topic, const string &op_user);
 bool doesFileExist (const string &possible_file, const string &op_user);
@@ -12,6 +15,8 @@ void addFile (const string &new_file, const string &op_user, const string &file_
 void showUsers ();
 void showTopics (const string &op_user);
 void showFiles (const string &op_user);
+void loadFileMap (const string &op_user, FileMap &file_map);
+string makeFileName (const string &op_user, const string &type);
 
 /**
  * @description Create user, topic, or file under given operating user
@@ -109,7 +114,7 @@ bool doesUserExist (const string &possible_user, const string &op_user) {
  */
 bool doesTopicExist (const string &possible_topic, const string &op_user) {
 
-    string file_name = data_path + op_user + "_" + "Topics";
+    string file_name = makeFileName(op_user, "Topics");
 
     ifstream topics(file_name);
     string real_topic;
@@ -133,7 +138,7 @@ bool doesTopicExist (const string &possible_topic, const string &op_user) {
  */
 bool doesFileExist (const string &possible_file, const string &op_user) {
 
-    string file_name = data_path + op_user + "_" + "Files";
+    string file_name = makeFileName(op_user, "Files");
 
     ifstream files(file_name);
     string old_file, old_file_name;
@@ -181,7 +186,7 @@ void addUser (const string &new_user, const string &op_user, const string &extra
  */
 void addTopic (const string &new_topic, const string &op_user, const string &extra) {
 
-    string file_name = data_path + op_user + "_" + "Topics";
+    string file_name = makeFileName(op_user, "Topics");
 
     ofstream topics;
     topics.open(file_name, ofstream::app);
@@ -200,7 +205,7 @@ void addTopic (const string &new_topic, const string &op_user, const string &ext
  */
 void addFile (const string &new_file, const string &op_user, const string &file_path) {
 
-    string file_name = data_path + op_user + "_" + "Files";
+    string file_name = makeFileName(op_user, "Files");
     string added_file = new_file + "," + file_path;
 
     ofstream files;
@@ -234,7 +239,8 @@ void showUsers () {
  */
 void showTopics (const string &op_user) {
 
-    string file_name = data_path + op_user + "_" + "Topics";
+    string file_name = makeFileName(op_user, "Topics");
+
 
     ifstream topics(file_name);
     string real_topic;
@@ -253,7 +259,7 @@ void showTopics (const string &op_user) {
  */
 void showFiles (const string &op_user) {
 
-    string file_name = data_path + op_user + "_" + "Files";
+    string file_name = makeFileName(op_user, "Files");
 
     ifstream files(file_name);
     string file, name, location;
@@ -270,5 +276,45 @@ void showFiles (const string &op_user) {
     }
 
     files.close();
+
+}
+
+/**
+ * @description Generate mapping from file name to its disk location
+ * @param op_user Name of operating user
+ * @param file_map Reference to structure that stores mapping
+ */
+void loadFileMap (const string &op_user, FileMap &file_map) {
+
+    string file_name = makeFileName(op_user, "Files");
+
+    ifstream files(file_name);
+    string file, name, location;
+    size_t comma_pos;
+
+    while (getline(files, file)) {
+
+        comma_pos = file.find_first_of(',', 0);
+        name = file.substr(0, comma_pos);
+        location = file.substr(comma_pos + 1);
+
+        file_map[name] = location;
+
+    }
+
+    files.close();
+
+}
+
+/**
+ * @description Generate file name for operating user and entity type to access
+ * @param op_user Name of operating user
+ * @param type Entity type to access
+ * @return File name to access
+ */
+string makeFileName (const string &op_user, const string &type) {
+
+    string file_name = data_path + op_user + "_" + type;
+    return file_name;
 
 }

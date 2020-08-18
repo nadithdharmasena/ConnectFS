@@ -5,6 +5,12 @@ using namespace std;
 
 extern string data_path;
 
+void tokenizeInput (const string& input, vector<string> &tokens);
+bool isNameAlpha (const string &name);
+bool getConfirmation (const string &message, const string &name);
+void displayHelp (const string &command);
+
+
 /**
  * @description Tokenizes the user's shell input by space
  * @param input User's shell input

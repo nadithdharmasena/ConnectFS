@@ -1,26 +1,37 @@
 #include <iostream>
 #include <vector>
 #include <unordered_set>
-#include <unistd.h>
+#include <unordered_map>
+#include <memory>
 
 #include "utilities.cpp"
 #include "simple_utf_ops.cpp"
 #include "graph_ops.cpp"
+#include "Node.cpp"
 
 using namespace std;
+
+typedef unordered_map<string, shared_ptr<Node>> Graph;
+typedef unordered_map<string, string> FileMap;
 
 unordered_set<string> entities{"user", "topic", "file"};
 string data_path = "./data/";
 
-void handleUse (const vector<string> &tokens, string &op_user);
+void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map, FileMap &file_map);
 void handleCreate (const vector<string> &tokens, const string &op_user);
 void handleShow (const vector<string> &tokens, const string &op_user);
 void handleAdd (const vector<string> &tokens, const string &op_user);
+void handleExplore (const vector<string> &tokens, const string &op_user, Graph &graph_map, FileMap &file_map);
 
 int main(int ac, char **argv) {
 
     string op_user = "Default", input;
+
+    Graph graph_map;
+    FileMap file_map;
+
     bool display_shell = true;
+    bool reload_graph = true;
 
     while (display_shell) {
         cout << "ConnectFS> ";
@@ -41,7 +52,8 @@ int main(int ac, char **argv) {
             cout << "The current operating user is " << op_user << "." << endl;
         } else if (tokens[0] == "use") {
             // User entered "Use User" command
-            handleUse(tokens, op_user);
+            handleUse(tokens, op_user, graph_map, file_map);
+            reload_graph = false;
         } else if (tokens[0] == "create") {
             // User entered "Create" command to create new user, topic, or file
             handleCreate(tokens, op_user);
@@ -53,6 +65,16 @@ int main(int ac, char **argv) {
             // User entered "Add" command to add a File/Topic under a Topic
             // Ensure user does not add a cycle in the graph?
             handleAdd(tokens, op_user);
+            reload_graph = true;
+        } else if (tokens[0] == "explore") {
+
+            if (reload_graph) {
+                loadGraph(op_user, graph_map);
+                loadFileMap(op_user, file_map);
+                reload_graph = false;
+            }
+
+            handleExplore(tokens, op_user, graph_map, file_map);
         }
 
     }
@@ -61,7 +83,14 @@ int main(int ac, char **argv) {
 
 }
 
-void handleUse (const vector<string> &tokens, string &op_user) {
+/**
+ * @description Handle the use command; change the operating user
+ * @param tokens Tokenized user input
+ * @param op_user Reference to main's operating user string
+ * @param graph_map Reference to main's graph structure
+ * @param file_map Reference to main's file to location structure
+ */
+void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map, FileMap &file_map) {
 
     if (tokens.size() != 2) {
         displayHelp(tokens[0]);
@@ -71,9 +100,14 @@ void handleUse (const vector<string> &tokens, string &op_user) {
 
         string new_user = tokens[1];
 
-        // Checks for existence of user
-        if (doesUserExist(new_user, op_user)) {
+        if (new_user == op_user) {
+            // Checks if the user attempted to switch to the current operating user
+            cout << "You are already using " << new_user << "." << endl;
+        } else if (doesUserExist(new_user, op_user)) {
+            // Checks for existence of user
             op_user = new_user;
+            loadGraph(op_user, graph_map);
+            loadFileMap(op_user, file_map);
             cout << "Operating user switched to " << new_user << "." << endl;
         } else {
             cout << "User " << new_user << " does not exist. Use the following command to create it." << endl;
@@ -84,6 +118,11 @@ void handleUse (const vector<string> &tokens, string &op_user) {
 
 }
 
+/**
+ * @description Handle create command; add U,T, or F to permanent storage
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ */
 void handleCreate (const vector<string> &tokens, const string &op_user) {
 
     if (tokens.size() < 3) {
@@ -102,6 +141,11 @@ void handleCreate (const vector<string> &tokens, const string &op_user) {
 
 }
 
+/**
+ * @description Handle show command; show U,T, or F
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ */
 void handleShow (const vector<string> &tokens, const string &op_user) {
 
     if (tokens.size() < 2) {
@@ -112,8 +156,6 @@ void handleShow (const vector<string> &tokens, const string &op_user) {
         showTopics(op_user);
     } else if (tokens[1] == "files") {
         showFiles(op_user);
-    } else if (tokens[1] == "path") {
-        cout << "Path" << endl;
     } else if (tokens[1] == "help") {
         cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
     } else {
@@ -122,6 +164,11 @@ void handleShow (const vector<string> &tokens, const string &op_user) {
 
 }
 
+/**
+ * @description Handle add command; add edge between Topic and Topic/File
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ */
 void handleAdd (const vector<string> &tokens, const string &op_user) {
 
     if (tokens.size() != 4) {
@@ -134,6 +181,43 @@ void handleAdd (const vector<string> &tokens, const string &op_user) {
 
     } else if (tokens[1] == "topic" || tokens[1] == "file") {
         addEdge(tokens, op_user);
+    } else {
+        displayHelp(tokens[0]);
+    }
+
+}
+
+/**
+ * @description Handle explore command;
+ *              Display list of files under given topic name;
+ *              Or, make folder of files under given topic name
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ * @param graph_map Reference to main's graph structure
+ * @param file_map Reference to main's file to location structure
+ */
+void handleExplore (const vector<string> &tokens, const string &op_user, Graph &graph_map, FileMap &file_map) {
+
+    if (tokens.size() < 3) {
+
+        if (tokens.size() == 2 && tokens[1] == "help") {
+            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+        } else {
+            displayHelp(tokens[0]);
+        }
+
+    } else if (tokens[1] == "list") {
+
+        string topic = tokens[2] + "_Topic";
+        shared_ptr<Node> topic_ptr;
+
+        if (graph_map.find(topic) != graph_map.end()) {
+            topic_ptr = graph_map[topic];
+            listExplore(topic_ptr, file_map);
+        } else {
+            cout << "Topic " << tokens[2] << " has not been added to the graph." << endl;
+        }
+
     } else {
         displayHelp(tokens[0]);
     }
