@@ -1,20 +1,37 @@
 #include <iostream>
 #include <fstream>
-#include <memory>
 
-#include "Node.h"
+#include "graph_ops.h"
+#include "simple_utf_ops.h"
+#include "utilities.h"
 
 using namespace std;
 
-typedef unordered_map<string, shared_ptr<Node>> Graph;
-typedef unordered_map<string, string> FileMap;
+/**
+ * @description Explore the components connected to the searched topic
+ * @param tokens Tokenized user input
+ * @param graph_map Map containing loaded graph
+ * @param file_map Mapping of file names to file locations
+ */
+void explore (const vector<string> &tokens, Graph &graph_map, FileMap &file_map) {
 
-void listExplore (const shared_ptr<Node> &node, FileMap &file_map);
-void addEdge (const vector<string> &tokens, const string &op_user);
-void loadGraph (const string &op_user, Graph &graph_map);
-void extractEdgeInfo (const string &edge, vector<string> &parties);
-bool doesEdgeExist (const string &file_name, const string &edge);
-string makeGraphFileName (const string &op_user);
+    string topic = tokens[2] + "_Topic";
+    shared_ptr<Node> topic_ptr;
+
+    if (graph_map.find(topic) != graph_map.end()) {
+        topic_ptr = graph_map[topic];
+
+        if (tokens[1] == "list") {
+            listExplore(topic_ptr, file_map);
+        } else {
+            cout << "Generate bash script and execute it at end of exploration." << endl;
+        }
+
+    } else {
+        cout << "Topic " << tokens[2] << " has not been added to the graph." << endl;
+    }
+
+}
 
 /**
  * @description List files under given node
@@ -25,7 +42,7 @@ void listExplore (const shared_ptr<Node> &node, FileMap &file_map) {
 
     if (node->isFile()) {
         string name = node->getName();
-        cout << name << ": " << file_map[name] << endl;
+        cout << name << getFileExtension(file_map[name]) << ": " << file_map[name] << endl;
     } else {
 
         set<shared_ptr<Node>> children = node->getChildren();
@@ -103,6 +120,8 @@ void addEdge (const vector<string> &tokens, const string &op_user) {
  * @param graph_map unordered_map which holds the graph
  */
 void loadGraph (const string &op_user, Graph &graph_map) {
+
+    graph_map.clear();
 
     string file_name = makeGraphFileName(op_user);
 

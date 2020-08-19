@@ -1,22 +1,15 @@
 #include <iostream>
-#include <vector>
+
+#include "utilities.h"
 
 using namespace std;
-
-extern string data_path;
-
-void tokenizeInput (const string& input, vector<string> &tokens);
-bool isNameAlpha (const string &name);
-bool getConfirmation (const string &message, const string &name);
-void displayHelp (const string &command);
-
 
 /**
  * @description Tokenizes the user's shell input by space
  * @param input User's shell input
  * @param tokens Holds tokenized values
  */
-void tokenizeInput (const string& input, vector<string> &tokens) {
+void tokenizeInput (const string &input, vector<string> &tokens) {
 
     // Leave the tokens vector empty if the user input nothing
     if (input.empty())
@@ -56,10 +49,10 @@ void tokenizeInput (const string& input, vector<string> &tokens) {
  * @param name
  * @return True if all characters are alphabetic; false if not
  */
-bool isNameAlpha (const string &name) {
+bool isNameAlphaNum (const string &name) {
 
     for (char letter : name) {
-        if (!isalpha(letter))
+        if (!isalnum(letter))
             return false;
     }
 

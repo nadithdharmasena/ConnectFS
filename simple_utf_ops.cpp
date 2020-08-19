@@ -1,22 +1,10 @@
 #include <iostream>
 #include <fstream>
 
+#include "simple_utf_ops.h"
+#include "utilities.h"
+
 using namespace std;
-
-typedef unordered_map<string, string> FileMap;
-
-void createEntity (const vector<string> &tokens, const string &op_user);
-bool doesUserExist (const string &possible_user, const string &op_user);
-bool doesTopicExist (const string &possible_topic, const string &op_user);
-bool doesFileExist (const string &possible_file, const string &op_user);
-void addUser (const string &new_user, const string &op_user, const string &extra);
-void addTopic (const string &new_topic, const string &op_user, const string &extra);
-void addFile (const string &new_file, const string &op_user, const string &file_path);
-void showUsers ();
-void showTopics (const string &op_user);
-void showFiles (const string &op_user);
-void loadFileMap (const string &op_user, FileMap &file_map);
-string makeFileName (const string &op_user, const string &type);
 
 /**
  * @description Create user, topic, or file under given operating user
@@ -57,7 +45,7 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
     entity[0] = toupper(entity[0]);
 
     // Checks if topic or file name adheres to naming conventions and is not a duplicate
-    if (name.size() >= 3 && (is_name_alpha = isNameAlpha(name)) && !(does_exist = doesExist(name, op_user)) ) {
+    if (name.size() >= 3 && (is_name_alpha = isNameAlphaNum(name)) && !(does_exist = doesExist(name, op_user)) ) {
 
         bool confirmed = getConfirmation(entity, name);
 
@@ -205,6 +193,11 @@ void addTopic (const string &new_topic, const string &op_user, const string &ext
  */
 void addFile (const string &new_file, const string &op_user, const string &file_path) {
 
+    if (file_path.empty()) {
+        cout << "File " << new_file << " was not added because it pointed to nothing." << endl;
+        return;
+    }
+
     string file_name = makeFileName(op_user, "Files");
     string added_file = new_file + "," + file_path;
 
@@ -286,6 +279,7 @@ void showFiles (const string &op_user) {
  */
 void loadFileMap (const string &op_user, FileMap &file_map) {
 
+    file_map.clear();
     string file_name = makeFileName(op_user, "Files");
 
     ifstream files(file_name);
@@ -303,6 +297,13 @@ void loadFileMap (const string &op_user, FileMap &file_map) {
     }
 
     files.close();
+
+}
+
+string getFileExtension (const string &file_loc) {
+
+    int pos = file_loc.find_last_of('.');
+    return file_loc.substr(pos);
 
 }
 

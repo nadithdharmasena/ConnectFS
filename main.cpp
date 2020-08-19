@@ -1,20 +1,12 @@
 #include <iostream>
-#include <vector>
 #include <unordered_set>
-#include <unordered_map>
-#include <memory>
 
-#include "utilities.cpp"
-#include "simple_utf_ops.cpp"
-#include "graph_ops.cpp"
-#include "Node.cpp"
+#include "utilities.h"
+#include "simple_utf_ops.h"
+#include "graph_ops.h"
 
 using namespace std;
 
-typedef unordered_map<string, shared_ptr<Node>> Graph;
-typedef unordered_map<string, string> FileMap;
-
-unordered_set<string> entities{"user", "topic", "file"};
 string data_path = "./data/";
 
 void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map, FileMap &file_map);
@@ -125,6 +117,8 @@ void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map,
  */
 void handleCreate (const vector<string> &tokens, const string &op_user) {
 
+    unordered_set<string> entities{"user", "topic", "file"};
+
     if (tokens.size() < 3) {
 
         if (tokens.size() == 2 && tokens[1] == "help") {
@@ -189,7 +183,7 @@ void handleAdd (const vector<string> &tokens, const string &op_user) {
 
 /**
  * @description Handle explore command;
- *              Display list of files under given topic name;
+ *              Display list of files under given topic name
  *              Or, make folder of files under given topic name
  * @param tokens Tokenized user input
  * @param op_user Name of operating user
@@ -206,17 +200,9 @@ void handleExplore (const vector<string> &tokens, const string &op_user, Graph &
             displayHelp(tokens[0]);
         }
 
-    } else if (tokens[1] == "list") {
+    } else if (tokens[1] == "list" || tokens[1] == "make") {
 
-        string topic = tokens[2] + "_Topic";
-        shared_ptr<Node> topic_ptr;
-
-        if (graph_map.find(topic) != graph_map.end()) {
-            topic_ptr = graph_map[topic];
-            listExplore(topic_ptr, file_map);
-        } else {
-            cout << "Topic " << tokens[2] << " has not been added to the graph." << endl;
-        }
+        explore(tokens, graph_map, file_map);
 
     } else {
         displayHelp(tokens[0]);
