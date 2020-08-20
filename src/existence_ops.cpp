@@ -1,7 +1,7 @@
 #include <fstream>
 
-#include "existence_ops.h"
-#include "file_name_ops.h"
+#include "../headers/existence_ops.h"
+#include "../headers/file_name_ops.h"
 
 using namespace std;
 

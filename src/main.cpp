@@ -1,11 +1,11 @@
 #include <iostream>
 #include <unordered_set>
 
-#include "utilities.h"
-#include "existence_ops.h"
-#include "simple_utf_ops.h"
-#include "graph_ops.h"
-#include "load_ops.h"
+#include "../headers/utilities.h"
+#include "../headers/existence_ops.h"
+#include "../headers/simple_utf_ops.h"
+#include "../headers/graph_ops.h"
+#include "../headers/load_ops.h"
 
 using namespace std;
 

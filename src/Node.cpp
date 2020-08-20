@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Node.h"
+#include "../headers/Node.h"
 
 using namespace std;
 

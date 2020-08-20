@@ -2,12 +2,12 @@
 #include <fstream>
 #include <sstream>
 
-#include "graph_ops.h"
-#include "existence_ops.h"
-#include "file_name_ops.h"
-#include "copy_ops.h"
-#include "utilities.h"
-#include "load_ops.h"
+#include "../headers/graph_ops.h"
+#include "../headers/existence_ops.h"
+#include "../headers/file_name_ops.h"
+#include "../headers/copy_ops.h"
+#include "../headers/utilities.h"
+#include "../headers/load_ops.h"
 
 using namespace std;
 

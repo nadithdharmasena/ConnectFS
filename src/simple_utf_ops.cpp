@@ -2,11 +2,11 @@
 #include <fstream>
 #include <sstream>
 
-#include "simple_utf_ops.h"
-#include "graph_ops.h"
-#include "utilities.h"
-#include "existence_ops.h"
-#include "file_name_ops.h"
+#include "../headers/simple_utf_ops.h"
+#include "../headers/graph_ops.h"
+#include "../headers/utilities.h"
+#include "../headers/existence_ops.h"
+#include "../headers/file_name_ops.h"
 
 using namespace std;
 

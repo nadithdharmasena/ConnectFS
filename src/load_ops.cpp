@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "load_ops.h"
-#include "file_name_ops.h"
+#include "../headers/load_ops.h"
+#include "../headers/file_name_ops.h"
 
 using namespace std;
 
