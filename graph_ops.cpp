@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
 
 #include "graph_ops.h"
 #include "simple_utf_ops.h"
@@ -8,27 +9,109 @@
 using namespace std;
 
 /**
- * @description Explore the components connected to the searched topic
- * @param tokens Tokenized user input
- * @param graph_map Map containing loaded graph
- * @param file_map Mapping of file names to file locations
+ * @description Creates and sets permissions for the file copy bash script
  */
-void explore (const vector<string> &tokens, Graph &graph_map, FileMap &file_map) {
+void createMakeFile () {
 
-    string topic = tokens[2] + "_Topic";
-    shared_ptr<Node> topic_ptr;
+    string file_name = getMakeFileName();
 
-    if (graph_map.find(topic) != graph_map.end()) {
-        topic_ptr = graph_map[topic];
+    ofstream make_file(file_name);
+    make_file << "#!/bin/bash" << endl;
+    make_file.close();
 
-        if (tokens[1] == "list") {
-            listExplore(topic_ptr, file_map);
-        } else {
-            cout << "Generate bash script and execute it at end of exploration." << endl;
-        }
+    if (fork() == 0) {
+        int ret_val = execlp("/bin/chmod", "chmod", "+x", file_name.c_str(), nullptr);
+        cout << ret_val << endl;
+    } else {
+        wait(nullptr);
+    }
+
+}
+
+/**
+ * @description Appends command to file copy bash script
+ * @param command Command to append
+ */
+void appendCommand (const string &command) {
+
+    string file_name = getMakeFileName();
+
+    ofstream make_file;
+    make_file.open(file_name, ofstream::app);
+    make_file << command << endl;
+    make_file.close();
+
+}
+
+/**
+ * @description Executes the folder creation make file
+ * @param destination Location of destination folder
+ */
+void executeMakeFile (const string &destination) {
+
+    string file_name = getMakeFileName();
+
+    ofstream make_file;
+
+    make_file.open(file_name, ofstream::app);
+    make_file << "open " << destination << endl;
+    make_file.close();
+
+    string command = "./" + file_name;
+
+    if (fork() == 0) {
+        execlp(command.c_str(), nullptr);
+    } else {
+        wait(nullptr);
+    }
+
+}
+
+/**
+ * @description Deletes the file copy bash script
+ */
+void deleteMakeFile () {
+
+    string file_name = getMakeFileName();
+
+    if (fork() == 0) {
+        execlp("/bin/rm", "rm", file_name.c_str(),nullptr);
+    } else {
+        wait(nullptr);
+    }
+
+}
+
+/**
+ * @description Traverse connected topics and files
+ * @param node Current node in the traversal
+ * @param file_map Mapping of files to their locations
+ * @param destination Destination folder to which files are copied
+ */
+void makeExplore (const shared_ptr<Node> &node, FileMap &file_map, string destination) {
+
+    if (node->isFile()) {
+
+        string file_name, file_location, complete_name, copy_command;
+
+        file_name = node->getName();
+        file_location = file_map[file_name];
+        complete_name = file_name + getFileExtension(file_location);
+
+        file_location = "$HOME" + file_location.substr(1);
+        destination = "$HOME" + destination.substr(1);
+
+        copy_command = "cp " + file_location + " " + destination + "/" + complete_name;
+
+        appendCommand(copy_command);
 
     } else {
-        cout << "Topic " << tokens[2] << " has not been added to the graph." << endl;
+
+        set<shared_ptr<Node>> children = node->getChildren();
+        for (const auto & itr : children) {
+            makeExplore(itr, file_map, destination);
+        }
+
     }
 
 }
@@ -42,12 +125,14 @@ void listExplore (const shared_ptr<Node> &node, FileMap &file_map) {
 
     if (node->isFile()) {
         string name = node->getName();
-        cout << name << getFileExtension(file_map[name]) << ": " << file_map[name] << endl;
+        cout << "(F) " << name << getFileExtension(file_map[name]) << ": " << file_map[name] << endl;
     } else {
 
+        cout << "(T) " << node->getName() << endl;
+
         set<shared_ptr<Node>> children = node->getChildren();
-        for (auto itr = children.begin(); itr != children.end(); ++itr) {
-            listExplore(*itr, file_map);
+        for (const auto & itr : children) {
+            listExplore(itr, file_map);
         }
 
     }
@@ -86,7 +171,7 @@ void addEdge (const vector<string> &tokens, const string &op_user) {
         return;
     }
 
-    string file_name = makeGraphFileName(op_user);
+    string file_name = getGraphFileName(op_user);
     string edge = parent + "_Topic," + child + "_" + child_type;
 
     // Ensure edge-to-add is not a duplicate of an existing edge
@@ -123,7 +208,7 @@ void loadGraph (const string &op_user, Graph &graph_map) {
 
     graph_map.clear();
 
-    string file_name = makeGraphFileName(op_user);
+    string file_name = getGraphFileName(op_user);
 
     ifstream graph(file_name);
     string edge;
@@ -194,7 +279,15 @@ bool doesEdgeExist (const string &file_name, const string &edge) {
  * @param op_user Name of operating user
  * @return File name of operating user's graph
  */
-string makeGraphFileName (const string &op_user) {
+static string getGraphFileName (const string &op_user) {
     string file_name = data_path + op_user + "_Graph";
     return file_name;
+}
+
+/**
+ * @description Generates file name for bash file for folder creation
+ * @return
+ */
+static string getMakeFileName () {
+    return data_path + "make_file.sh";
 }

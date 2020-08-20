@@ -300,11 +300,14 @@ void loadFileMap (const string &op_user, FileMap &file_map) {
 
 }
 
+/**
+ * @description Find file extension given its location
+ * @param file_loc Location of file
+ * @return Extension of file
+ */
 string getFileExtension (const string &file_loc) {
-
     int pos = file_loc.find_last_of('.');
     return file_loc.substr(pos);
-
 }
 
 /**

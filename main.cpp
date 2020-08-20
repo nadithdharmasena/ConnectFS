@@ -12,8 +12,9 @@ string data_path = "./data/";
 void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map, FileMap &file_map);
 void handleCreate (const vector<string> &tokens, const string &op_user);
 void handleShow (const vector<string> &tokens, const string &op_user);
-void handleAdd (const vector<string> &tokens, const string &op_user);
-void handleExplore (const vector<string> &tokens, const string &op_user, Graph &graph_map, FileMap &file_map);
+void handleLink (const vector<string> &tokens, const string &op_user);
+void handleList (const vector<string> &tokens, Graph &graph_map, FileMap &file_map);
+void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_map);
 
 int main(int ac, char **argv) {
 
@@ -53,12 +54,11 @@ int main(int ac, char **argv) {
             // User entered "See" command to see list of
             // Users, topics, or files
             handleShow(tokens, op_user);
-        } else if (tokens[0] == "add") {
-            // User entered "Add" command to add a File/Topic under a Topic
-            // Ensure user does not add a cycle in the graph?
-            handleAdd(tokens, op_user);
+        } else if (tokens[0] == "link") {
+            // User entered "Link" command to link a File/Topic to a Topic
+            handleLink(tokens, op_user);
             reload_graph = true;
-        } else if (tokens[0] == "explore") {
+        } else if (tokens[0] == "list" || tokens[0] == "make") {
 
             if (reload_graph) {
                 loadGraph(op_user, graph_map);
@@ -66,7 +66,13 @@ int main(int ac, char **argv) {
                 reload_graph = false;
             }
 
-            handleExplore(tokens, op_user, graph_map, file_map);
+            if (tokens[0] == "list")
+                handleList(tokens, graph_map, file_map);
+            else
+                handleMake(tokens, graph_map, file_map);
+
+        } else {
+            cout << "Type help." << endl;
         }
 
     }
@@ -163,7 +169,7 @@ void handleShow (const vector<string> &tokens, const string &op_user) {
  * @param tokens Tokenized user input
  * @param op_user Name of operating user
  */
-void handleAdd (const vector<string> &tokens, const string &op_user) {
+void handleLink (const vector<string> &tokens, const string &op_user) {
 
     if (tokens.size() != 4) {
 
@@ -182,28 +188,64 @@ void handleAdd (const vector<string> &tokens, const string &op_user) {
 }
 
 /**
- * @description Handle explore command;
- *              Display list of files under given topic name
- *              Or, make folder of files under given topic name
+ * @description List the files and topics connected to a topic
  * @param tokens Tokenized user input
- * @param op_user Name of operating user
- * @param graph_map Reference to main's graph structure
- * @param file_map Reference to main's file to location structure
+ * @param graph_map Structure containing topic-file graph
+ * @param file_map Mapping of file names to their locations
  */
-void handleExplore (const vector<string> &tokens, const string &op_user, Graph &graph_map, FileMap &file_map) {
+void handleList (const vector<string> &tokens, Graph &graph_map, FileMap &file_map) {
 
-    if (tokens.size() < 3) {
+    if (tokens.size() == 2) {
 
-        if (tokens.size() == 2 && tokens[1] == "help") {
+        if (tokens[1] == "help") {
             cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
         } else {
-            displayHelp(tokens[0]);
+
+            string topic = tokens[1] + "_Topic";
+
+            if (graph_map.find(topic) != graph_map.end()) {
+                shared_ptr<Node> topic_ptr = graph_map[topic];
+                listExplore(topic_ptr, file_map);
+            } else {
+                cout << "Topic " << tokens[1] << " has not been added to the graph." << endl;
+            }
+
         }
 
-    } else if (tokens[1] == "list" || tokens[1] == "make") {
+    } else {
+        displayHelp(tokens[0]);
+    }
 
-        explore(tokens, graph_map, file_map);
+}
 
+/**
+ * @description Make a folder containing the files connected to a topic
+ * @param tokens Tokenized user input
+ * @param graph_map Structure containing topic-file graph
+ * @param file_map Mapping of file names to their locations
+ */
+void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_map) {
+
+    if (tokens.size() == 3) {
+
+        string topic = tokens[1] + "_Topic";
+
+        if (graph_map.find(topic) != graph_map.end()) {
+
+            shared_ptr<Node> topic_ptr = graph_map[topic];
+            string destination = tokens[2];
+
+            createMakeFile();
+            makeExplore(topic_ptr, file_map, destination);
+            executeMakeFile(destination);
+            deleteMakeFile();
+
+        } else {
+            cout << "Topic " << tokens[1] << " has not been added to the graph." << endl;
+        }
+
+    } else if (tokens.size() == 2 && tokens[1] == "help") {
+        cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
     } else {
         displayHelp(tokens[0]);
     }
