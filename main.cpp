@@ -2,8 +2,10 @@
 #include <unordered_set>
 
 #include "utilities.h"
+#include "existence_ops.h"
 #include "simple_utf_ops.h"
 #include "graph_ops.h"
+#include "load_ops.h"
 
 using namespace std;
 
@@ -15,6 +17,7 @@ void handleShow (const vector<string> &tokens, const string &op_user);
 void handleLink (const vector<string> &tokens, const string &op_user);
 void handleList (const vector<string> &tokens, Graph &graph_map, FileMap &file_map);
 void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_map);
+void handleRemove (const vector<string> &tokens, const string &op_user);
 
 int main(int ac, char **argv) {
 
@@ -71,8 +74,11 @@ int main(int ac, char **argv) {
             else
                 handleMake(tokens, graph_map, file_map);
 
+        } else if (tokens[0] == "remove") {
+            handleRemove(tokens, op_user);
+            reload_graph = true;
         } else {
-            cout << "Type help." << endl;
+            cout << "Display help." << endl;
         }
 
     }
@@ -204,8 +210,12 @@ void handleList (const vector<string> &tokens, Graph &graph_map, FileMap &file_m
             string topic = tokens[1] + "_Topic";
 
             if (graph_map.find(topic) != graph_map.end()) {
+
+                unordered_set<string> visited;
                 shared_ptr<Node> topic_ptr = graph_map[topic];
-                listExplore(topic_ptr, file_map);
+
+                listExplore(topic_ptr, file_map, visited);
+
             } else {
                 cout << "Topic " << tokens[1] << " has not been added to the graph." << endl;
             }
@@ -232,13 +242,18 @@ void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_m
 
         if (graph_map.find(topic) != graph_map.end()) {
 
+            unordered_set<string> visited;
             shared_ptr<Node> topic_ptr = graph_map[topic];
-            string destination = tokens[2];
+            string destination = "$HOME" + tokens[2].substr(1);
 
-            createMakeFile();
-            makeExplore(topic_ptr, file_map, destination);
-            executeMakeFile(destination);
-            deleteMakeFile();
+            string message = "Are you sure you want to populate folder from " + tokens[1];
+
+            if (getConfirmation(message)) {
+                createMakeFile();
+                makeExplore(topic_ptr, file_map, visited, destination);
+                executeMakeFile(destination);
+                deleteMakeFile();
+            }
 
         } else {
             cout << "Topic " << tokens[1] << " has not been added to the graph." << endl;
@@ -246,6 +261,54 @@ void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_m
 
     } else if (tokens.size() == 2 && tokens[1] == "help") {
         cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+    } else {
+        displayHelp(tokens[0]);
+    }
+
+}
+
+/**
+ * @description Remove user, topic, or file from database
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ */
+void handleRemove (const vector<string> &tokens, const string &op_user) {
+
+    if (tokens.size() != 3) {
+
+        if (tokens.size() == 2 && tokens[1] == "help") {
+            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+        } else {
+            displayHelp(tokens[0]);
+        }
+
+    } else if (tokens[1] == "user") {
+
+        string user_to_remove = tokens[2];
+        string message = "Are you sure you want to remove user " + user_to_remove;
+
+        if (getConfirmation(message)) {
+            removeUser(user_to_remove, op_user);
+        }
+
+    } else if (tokens[1] == "topic") {
+
+        string topic_to_remove = tokens[2];
+        string message = "Are you sure you want to remove topic " + topic_to_remove;
+
+        if (getConfirmation(message)) {
+            removeTopic(topic_to_remove, op_user);
+        }
+
+    } else if (tokens[1] == "file") {
+
+        string file_to_remove = tokens[2];
+        string message = "Are you sure you want to remove file " + file_to_remove;
+
+        if (getConfirmation(message)) {
+            removeFile(file_to_remove, op_user);
+        }
+
     } else {
         displayHelp(tokens[0]);
     }

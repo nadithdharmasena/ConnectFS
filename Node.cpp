@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "Node.h"
 
 using namespace std;
@@ -15,6 +17,8 @@ Node::Node (const string& node_id) {
 
     if (suffix == "File")
         this->is_file = true;
+    else
+        this->is_file = false;
 
     this->name = name;
     this->node_id = node_id;

@@ -1,8 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "simple_utf_ops.h"
+#include "graph_ops.h"
 #include "utilities.h"
+#include "existence_ops.h"
+#include "file_name_ops.h"
 
 using namespace std;
 
@@ -47,12 +51,12 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
     // Checks if topic or file name adheres to naming conventions and is not a duplicate
     if (name.size() >= 3 && (is_name_alpha = isNameAlphaNum(name)) && !(does_exist = doesExist(name, op_user)) ) {
 
-        bool confirmed = getConfirmation(entity, name);
+        string message = "Are you sure you want to add new " + entity + " " + name;
+
+        bool confirmed = getConfirmation(message);
 
         if (confirmed) {
             addEntity(name, op_user, file);
-        } else {
-            cout << entity << " " << name << " was not added." << endl;
         }
 
     } else {
@@ -68,82 +72,6 @@ void createEntity (const vector<string> &tokens, const string &op_user) {
 
     }
 
-
-}
-
-/**
- * @description Determine whether the user exists
- * @param possible_user Name of user in question
- * @param op_user Name of operating user
- * @return True if user exists; false if not
- */
-bool doesUserExist (const string &possible_user, const string &op_user) {
-
-    ifstream users("./data/Users");
-    string real_user;
-
-    while (users >> real_user) {
-        if (real_user == possible_user) {
-            users.close();
-            return true;
-        }
-    }
-
-    users.close();
-    return false;
-
-}
-
-/**
- * @description Determine whether the topic exists under the given operating user
- * @param possible_topic Name of topic in question
- * @param op_user Name of operating user
- * @return True if topic exists; false if not
- */
-bool doesTopicExist (const string &possible_topic, const string &op_user) {
-
-    string file_name = makeFileName(op_user, "Topics");
-
-    ifstream topics(file_name);
-    string real_topic;
-
-    while (topics >> real_topic) {
-        if (real_topic == possible_topic) {
-            topics.close();
-            return true;
-        }
-    }
-
-    topics.close();
-    return false;
-}
-
-/**
- * @description Determine whether the file exists under the given operating user
- * @param possible_file Name of file in question
- * @param op_user Name of operating user
- * @return True if file exists; false if not
- */
-bool doesFileExist (const string &possible_file, const string &op_user) {
-
-    string file_name = makeFileName(op_user, "Files");
-
-    ifstream files(file_name);
-    string old_file, old_file_name;
-    size_t comma_pos;
-
-    while (getline(files, old_file)) {
-
-        comma_pos = old_file.find_first_of(',', 0);
-        old_file_name = old_file.substr(0, comma_pos);
-
-        if (old_file_name == possible_file)
-            return true;
-
-    }
-
-    files.close();
-    return false;
 
 }
 
@@ -174,7 +102,7 @@ void addUser (const string &new_user, const string &op_user, const string &extra
  */
 void addTopic (const string &new_topic, const string &op_user, const string &extra) {
 
-    string file_name = makeFileName(op_user, "Topics");
+    string file_name = getEntityFileName(op_user, "Topics");
 
     ofstream topics;
     topics.open(file_name, ofstream::app);
@@ -198,7 +126,7 @@ void addFile (const string &new_file, const string &op_user, const string &file_
         return;
     }
 
-    string file_name = makeFileName(op_user, "Files");
+    string file_name = getEntityFileName(op_user, "Files");
     string added_file = new_file + "," + file_path;
 
     ofstream files;
@@ -232,7 +160,7 @@ void showUsers () {
  */
 void showTopics (const string &op_user) {
 
-    string file_name = makeFileName(op_user, "Topics");
+    string file_name = getEntityFileName(op_user, "Topics");
 
 
     ifstream topics(file_name);
@@ -252,11 +180,11 @@ void showTopics (const string &op_user) {
  */
 void showFiles (const string &op_user) {
 
-    string file_name = makeFileName(op_user, "Files");
+    string file_name = getEntityFileName(op_user, "Files");
 
     ifstream files(file_name);
     string file, name, location;
-    size_t comma_pos;
+    int comma_pos;
 
     while (getline(files, file)) {
 
@@ -273,52 +201,77 @@ void showFiles (const string &op_user) {
 }
 
 /**
- * @description Generate mapping from file name to its disk location
+ * @description Remove user record from Users file
+ * @param user_to_remove Name of user to remove
  * @param op_user Name of operating user
- * @param file_map Reference to structure that stores mapping
  */
-void loadFileMap (const string &op_user, FileMap &file_map) {
+void removeUser (const string &user_to_remove, const string &op_user) {
 
-    file_map.clear();
-    string file_name = makeFileName(op_user, "Files");
+    if (user_to_remove == op_user) {
+        cout << "You cannot delete the current user." << endl;
+    } else {
 
-    ifstream files(file_name);
-    string file, name, location;
-    size_t comma_pos;
+        string users_file = data_path + "Users";
 
-    while (getline(files, file)) {
+        ifstream users_in(users_file);
+        string user;
+        stringstream updated_users;
 
-        comma_pos = file.find_first_of(',', 0);
-        name = file.substr(0, comma_pos);
-        location = file.substr(comma_pos + 1);
+        while (getline(users_in, user)) {
+            if (user != user_to_remove)
+                updated_users << user << endl;
+        }
 
-        file_map[name] = location;
+        ofstream users_out(users_file, ofstream::trunc);
+        users_out << updated_users.rdbuf();
 
     }
 
-    files.close();
+}
+
+void removeTopic (const string &topic_to_remove, const string &op_user) {
+
+    string topics_file = getEntityFileName(op_user, "Topics");
+
+    ifstream topics_in(topics_file);
+    string topic;
+    stringstream updated_topics;
+
+    // Keeping topics that are not the topic to be removed
+    while (getline(topics_in, topic)) {
+        if (topic != topic_to_remove)
+            updated_topics << topic << endl;
+    }
+
+    ofstream topics_out(topics_file, ofstream::trunc);
+    topics_out << updated_topics.rdbuf();
+
+    removeEdges(topic_to_remove, "Topic", op_user);
 
 }
 
-/**
- * @description Find file extension given its location
- * @param file_loc Location of file
- * @return Extension of file
- */
-string getFileExtension (const string &file_loc) {
-    int pos = file_loc.find_last_of('.');
-    return file_loc.substr(pos);
-}
+void removeFile (const string &file_to_remove, const string &op_user) {
 
-/**
- * @description Generate file name for operating user and entity type to access
- * @param op_user Name of operating user
- * @param type Entity type to access
- * @return File name to access
- */
-string makeFileName (const string &op_user, const string &type) {
+    string files_file = getEntityFileName(op_user, "Files");
 
-    string file_name = data_path + op_user + "_" + type;
-    return file_name;
+    ifstream files_in(files_file);
+    string file, name;
+    int comma_pos;
+    stringstream updated_files;
+
+    while (getline(files_in, file)) {
+
+        comma_pos = file.find_first_of(',', 0);
+        name = file.substr(0, comma_pos);
+
+        if (name != file_to_remove)
+            updated_files << file << endl;
+
+    }
+
+    ofstream files_out(files_file, ofstream::trunc);
+    files_out << updated_files.rdbuf();
+
+    removeEdges(file_to_remove, "File", op_user);
 
 }

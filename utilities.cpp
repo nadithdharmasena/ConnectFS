@@ -15,7 +15,7 @@ void tokenizeInput (const string &input, vector<string> &tokens) {
     if (input.empty())
         return;
 
-    size_t pos, prev_pos = 0;
+    int pos, prev_pos = 0;
     pos = input.find_first_of(' ', prev_pos);
 
     while (true) {
@@ -66,9 +66,9 @@ bool isNameAlphaNum (const string &name) {
  * @param name Name of entity to be added
  * @return True if user confirmed addition, false if not
  */
-bool getConfirmation (const string &message, const string &name) {
+bool getConfirmation (const string &message) {
 
-    cout << "Are you sure you want to add new " << message << " " << name << " (Y/N)? ";
+    cout << message << " (Y/N)? ";
 
     string response;
     getline(cin, response);
