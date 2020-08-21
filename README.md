@@ -47,6 +47,8 @@ for a dynamic file system that can remain clutter-free even after extensive use.
 
 ## How can I use ConnectFS?
 
+_Note that this program has only been tested on MacOS._
+
 Begin by cloning this repository, navigating into your local repo folder, and running the following command.
 
 `cmake CMakeLists.txt`
