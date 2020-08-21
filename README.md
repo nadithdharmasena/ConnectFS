@@ -53,8 +53,13 @@ Begin by cloning this repository, navigating into your local repo folder, and ru
 
 If you do not have cmake installed on your computer, follow the download and install instructions at https://cmake.org/ or install cmake through Homebrew.
 
-After running the cmake command, run the following command to compile the source code.
+After running the cmake command, compile the source code using the following. 
 
 `make`
 
-If all goes well, you should have an executable file named ConnectFS in your local repo folder now. Before starting the application, create a folder named `data` in the same folder as your executable. This folder will hold the application's permanent storage files.
+If all goes well, you should have an executable file named ConnectFS in your local repo folder now. Before starting the application, create a folder named `data` in the same folder as your executable. 
+This folder will hold the application's permanent graph database storage files.
+
+## Shell Documentation
+
+[See DOCUMENTATION.md](DOCUMENTATION.md)
