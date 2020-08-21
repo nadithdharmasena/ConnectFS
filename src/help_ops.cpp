@@ -7,7 +7,7 @@
 
 using namespace std;
 
-static string help_file_location = "./help";
+static string help_file_location = "./misc/help";
 
 /**
  * @description Display in-depth explanation of given command
