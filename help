@@ -1,20 +1,4 @@
-# Shell Documentation
-
-## General Terms
-
-The following terms may be unclear to readers unfamiliar with ConnectFS, so
-please read this section carefully before reading on.
-
-* Operating User - User under whom commands are being executed
-    * Affects which database files are read and written, so it is important to ensure you are logged in to the correct operating user before running any commands
-* Topic - Graph node with a label that should describe its descendents
-* File - Graph node that contains a pointer to a location on the OS' existing file system
-* Link - Edge connecting a topic to another topic or a topic to a file
-    * Encodes the idea that a topic "contains" its direct file descendents and the file descendents of its topic descendents
-
-## Breakdown of Commands
-
-#### Help
+help
 
 Type the following commands followed by a space and "help" to get an in-depth explanation of what each one does.
 
@@ -26,19 +10,22 @@ Type the following commands followed by a space and "help" to get an in-depth ex
     - list
     - make
 
-    - Example: Enter 'link help' to get an explanation of what the link command does.
+Example: Enter 'link help' to get an explanation of what the link command does.
 
-#### Use
+help
+
+use
 
 Displays the name of the operating user.
 
 Usage: use <username>
 
     - <username> represents the name of the operating user to whom you would like to switch
-    
     - Example: To make user John the operating user, enter 'use John'
 
-#### Create
+use
+
+create
 
 Creates a new user, topic, or file entity for the current operating user.
 
@@ -49,11 +36,12 @@ Usage: create <entity> <name> <location>
     - <location> represents the OS file system location of the file you would like to track in ConnectFS
         - The location must be a relative path from the home directory (~) and be wrapped in quotation marks
         - This argument is only required when creating a file
-        
     - Example: To create a user named John, enter 'create user John'
     - Example: To create a file named Project that links to a Desktop file named project.py, enter 'create file Project "~/Desktop/project.py"
 
-#### Link
+create
+
+link
 
 Links a topic or file entity as a child of a topic entity.
 
@@ -62,10 +50,11 @@ Usage: link <child entity> <child> <parent>
     - <child entity> represents the entity type of the child party (topic or file)
     - <child> represents the name of the edge's child party
     - <parent> represents the name of the edge's parent party
-    
     - Example: To link file Project as a child of file Python, enter 'link file Project Python'
 
-#### Remove
+link
+
+remove
 
 Remove a user, topic, or file entity from the ConnectFS graph database.
 
@@ -73,30 +62,33 @@ Usage: remove <entity> <name>
 
     - <entity> represents the type of the to-be-removed entity (user, topic, or file)
     - <name> represents the name of the to-be-removed entity
-    
     - Example: To remove Topic Python, enter 'remove topic Python'
 
-#### Show
+remove
+
+show
 
 Show a complete list of the given type of entity.
 
 Usage: show <entity>
 
     - <entity> represents the type of the entities you would like to display
-    
     - Example: To show a list of topics for current operating user, enter 'show topics'
 
-#### List
+show
+
+list
 
 Lists all topics and files that are descendents of a topic.
 
 Usage: list <topic>
 
     - <topic> represents the name of the topic whose descendents you would like to see
-    
     - Example: To see the descendents of topic Python, enter 'list Python'
 
-#### Make
+list
+
+make
 
 Consolidates the file descendents of a topic into one folder on the OS' file system
 
@@ -105,5 +97,6 @@ Usage: make <topic> <location>
     - <topic> represents the name of the topic whose descendent files you would like to consolidate into a folder
     - <location> represents the OS file system folder location into which you would like descendent files to be copied
         - The location must be a relative path from the home directory (~) and be wrapped in quotation marks
-        
     - Example: To consolidate the topic Python into a Desktop folder named DataScience, enter 'make Python "~/Desktop/DataScience"'
+
+make

@@ -7,6 +7,7 @@
 #include "../headers/utilities.h"
 #include "../headers/existence_ops.h"
 #include "../headers/file_name_ops.h"
+#include "../headers/help_ops.h"
 
 using namespace std;
 

@@ -79,12 +79,3 @@ bool getConfirmation (const string &message) {
         return false;
 
 }
-
-/**
- * @description Display help prompt for given command
- * @param command Holds type of command
- */
-void displayHelp (const string &command) {
-    cout << "Use the following command to get help." << endl;
-    cout << "\t" << command << " help" << endl;
-}

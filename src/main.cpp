@@ -6,6 +6,7 @@
 #include "../headers/simple_utf_ops.h"
 #include "../headers/graph_ops.h"
 #include "../headers/load_ops.h"
+#include "../headers/help_ops.h"
 
 using namespace std;
 
@@ -78,7 +79,7 @@ int main(int ac, char **argv) {
                 handleMake(tokens, graph_map, file_map);
 
         } else {
-            cout << "Display help." << endl;
+            printHelp("help");
         }
 
     }
@@ -99,7 +100,7 @@ void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map,
     if (tokens.size() != 2) {
         displayHelp(tokens[0]);
     } else if (tokens[1] == "help") {
-        cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+        printHelp(tokens[0]);
     } else {
 
         string new_user = tokens[1];
@@ -134,7 +135,7 @@ void handleCreate (const vector<string> &tokens, const string &op_user) {
     if (tokens.size() < 3) {
 
         if (tokens.size() == 2 && tokens[1] == "help") {
-            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+            printHelp(tokens[0]);
         } else {
             displayHelp(tokens[0]);
         }
@@ -157,7 +158,7 @@ void handleLink (const vector<string> &tokens, const string &op_user) {
     if (tokens.size() != 4) {
 
         if (tokens.size() == 2 && tokens[1] == "help") {
-            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+            printHelp(tokens[0]);
         } else {
             displayHelp(tokens[0]);
         }
@@ -180,7 +181,7 @@ void handleRemove (const vector<string> &tokens, const string &op_user) {
     if (tokens.size() != 3) {
 
         if (tokens.size() == 2 && tokens[1] == "help") {
-            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+            printHelp(tokens[0]);
         } else {
             displayHelp(tokens[0]);
         }
@@ -234,7 +235,7 @@ void handleShow (const vector<string> &tokens, const string &op_user) {
     } else if (tokens[1] == "files") {
         showFiles(op_user);
     } else if (tokens[1] == "help") {
-        cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+        printHelp(tokens[0]);
     } else {
         displayHelp(tokens[0]);
     }
@@ -252,7 +253,7 @@ void handleList (const vector<string> &tokens, Graph &graph_map, FileMap &file_m
     if (tokens.size() == 2) {
 
         if (tokens[1] == "help") {
-            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+            printHelp(tokens[0]);
         } else {
 
             string topic = tokens[1] + "_Topic";
@@ -308,7 +309,7 @@ void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_m
         }
 
     } else if (tokens.size() == 2 && tokens[1] == "help") {
-        cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+        printHelp(tokens[0]);
     } else {
         displayHelp(tokens[0]);
     }
