@@ -16,7 +16,7 @@ resources and previously written code that would be helpful as you begin your wo
 on the project.
 
 Unfortunately, these files are scattered all over your computer. Since CS, math, and finance
-are typically unrelated, the files are probably stored in totally different places, 
+are typically unrelated, the files are probably stored in completely different places, 
 making your search for them quite difficult and time-consuming. This problem is a common
 one when considering the fact that many projects lie at the intersection of usually 
 disconnected topics. 
