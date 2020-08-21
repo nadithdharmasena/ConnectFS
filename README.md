@@ -16,9 +16,9 @@ resources and previously written code that would be helpful as you begin your wo
 on the project.
 
 Unfortunately, these files are scattered all over your computer. Since CS, math, and finance
-are typically unrelated, the files are probably stored in completely different places, 
+are generally unrelated, the files are probably stored in completely different places, 
 making your search for them quite difficult and time-consuming. This problem is a common
-one when considering the fact that many projects lie at the intersection of usually 
+one because many projects lie at the intersection of typically 
 disconnected topics. 
 
 This example highlights that the file-folder system on present-day operating systems
@@ -45,4 +45,16 @@ The fact that Files are simply pointers to locations on the OS' file system mean
 "real" data. This design ensures that Files can be deleted without erasing any underlying data, which makes
 for a dynamic file system that can remain clutter-free even after extensive use.
 
-## How do you use ConnectFS?
+## How can I use ConnectFS?
+
+Begin by cloning this repository, navigating into your local repo folder, and running the following command.
+
+`cmake CMakeLists.txt`
+
+If you do not have cmake installed on your computer, follow the download and install instructions at https://cmake.org/ or install cmake through Homebrew.
+
+After running the cmake command, run the following command to compile the source code.
+
+`make`
+
+If all goes well, you should have an executable file named ConnectFS in your local repo folder now. Before starting the application, create a folder named `data` in the same folder as your executable. This folder will hold the application's permanent storage files.
