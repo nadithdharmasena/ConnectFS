@@ -13,11 +13,11 @@ string data_path = "./data/";
 
 void handleUse (const vector<string> &tokens, string &op_user, Graph &graph_map, FileMap &file_map);
 void handleCreate (const vector<string> &tokens, const string &op_user);
-void handleShow (const vector<string> &tokens, const string &op_user);
 void handleLink (const vector<string> &tokens, const string &op_user);
+void handleRemove (const vector<string> &tokens, const string &op_user);
+void handleShow (const vector<string> &tokens, const string &op_user);
 void handleList (const vector<string> &tokens, Graph &graph_map, FileMap &file_map);
 void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_map);
-void handleRemove (const vector<string> &tokens, const string &op_user);
 
 int main(int ac, char **argv) {
 
@@ -53,14 +53,17 @@ int main(int ac, char **argv) {
         } else if (tokens[0] == "create") {
             // User entered "Create" command to create new user, topic, or file
             handleCreate(tokens, op_user);
-        } else if (tokens[0] == "show") {
-            // User entered "See" command to see list of
-            // Users, topics, or files
-            handleShow(tokens, op_user);
         } else if (tokens[0] == "link") {
             // User entered "Link" command to link a File/Topic to a Topic
             handleLink(tokens, op_user);
             reload_graph = true;
+        } else if (tokens[0] == "remove") {
+            handleRemove(tokens, op_user);
+            reload_graph = true;
+        } else if (tokens[0] == "show") {
+            // User entered "See" command to see list of
+            // Users, topics, or files
+            handleShow(tokens, op_user);
         } else if (tokens[0] == "list" || tokens[0] == "make") {
 
             if (reload_graph) {
@@ -74,9 +77,6 @@ int main(int ac, char **argv) {
             else
                 handleMake(tokens, graph_map, file_map);
 
-        } else if (tokens[0] == "remove") {
-            handleRemove(tokens, op_user);
-            reload_graph = true;
         } else {
             cout << "Display help." << endl;
         }
@@ -148,29 +148,6 @@ void handleCreate (const vector<string> &tokens, const string &op_user) {
 }
 
 /**
- * @description Handle show command; show U,T, or F
- * @param tokens Tokenized user input
- * @param op_user Name of operating user
- */
-void handleShow (const vector<string> &tokens, const string &op_user) {
-
-    if (tokens.size() < 2) {
-        displayHelp(tokens[0]);
-    } else if (tokens[1] == "users") {
-        showUsers();
-    } else if (tokens[1] == "topics") {
-        showTopics(op_user);
-    } else if (tokens[1] == "files") {
-        showFiles(op_user);
-    } else if (tokens[1] == "help") {
-        cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
-    } else {
-        displayHelp(tokens[0]);
-    }
-
-}
-
-/**
  * @description Handle add command; add edge between Topic and Topic/File
  * @param tokens Tokenized user input
  * @param op_user Name of operating user
@@ -187,6 +164,77 @@ void handleLink (const vector<string> &tokens, const string &op_user) {
 
     } else if (tokens[1] == "topic" || tokens[1] == "file") {
         addEdge(tokens, op_user);
+    } else {
+        displayHelp(tokens[0]);
+    }
+
+}
+
+/**
+ * @description Remove user, topic, or file from database
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ */
+void handleRemove (const vector<string> &tokens, const string &op_user) {
+
+    if (tokens.size() != 3) {
+
+        if (tokens.size() == 2 && tokens[1] == "help") {
+            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
+        } else {
+            displayHelp(tokens[0]);
+        }
+
+    } else if (tokens[1] == "user") {
+
+        string user_to_remove = tokens[2];
+        string message = "Are you sure you want to remove user " + user_to_remove;
+
+        if (getConfirmation(message)) {
+            removeUser(user_to_remove, op_user);
+        }
+
+    } else if (tokens[1] == "topic") {
+
+        string topic_to_remove = tokens[2];
+        string message = "Are you sure you want to remove topic " + topic_to_remove;
+
+        if (getConfirmation(message)) {
+            removeTopic(topic_to_remove, op_user);
+        }
+
+    } else if (tokens[1] == "file") {
+
+        string file_to_remove = tokens[2];
+        string message = "Are you sure you want to remove file " + file_to_remove;
+
+        if (getConfirmation(message)) {
+            removeFile(file_to_remove, op_user);
+        }
+
+    } else {
+        displayHelp(tokens[0]);
+    }
+
+}
+
+/**
+ * @description Handle show command; show U,T, or F
+ * @param tokens Tokenized user input
+ * @param op_user Name of operating user
+ */
+void handleShow (const vector<string> &tokens, const string &op_user) {
+
+    if (tokens.size() < 2) {
+        displayHelp(tokens[0]);
+    } else if (tokens[1] == "users") {
+        showUsers();
+    } else if (tokens[1] == "topics") {
+        showTopics(op_user);
+    } else if (tokens[1] == "files") {
+        showFiles(op_user);
+    } else if (tokens[1] == "help") {
+        cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
     } else {
         displayHelp(tokens[0]);
     }
@@ -261,54 +309,6 @@ void handleMake (const vector<string> &tokens, Graph &graph_map, FileMap &file_m
 
     } else if (tokens.size() == 2 && tokens[1] == "help") {
         cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
-    } else {
-        displayHelp(tokens[0]);
-    }
-
-}
-
-/**
- * @description Remove user, topic, or file from database
- * @param tokens Tokenized user input
- * @param op_user Name of operating user
- */
-void handleRemove (const vector<string> &tokens, const string &op_user) {
-
-    if (tokens.size() != 3) {
-
-        if (tokens.size() == 2 && tokens[1] == "help") {
-            cout << "Print out list of arguments and description for " << tokens[0] << "." << endl;
-        } else {
-            displayHelp(tokens[0]);
-        }
-
-    } else if (tokens[1] == "user") {
-
-        string user_to_remove = tokens[2];
-        string message = "Are you sure you want to remove user " + user_to_remove;
-
-        if (getConfirmation(message)) {
-            removeUser(user_to_remove, op_user);
-        }
-
-    } else if (tokens[1] == "topic") {
-
-        string topic_to_remove = tokens[2];
-        string message = "Are you sure you want to remove topic " + topic_to_remove;
-
-        if (getConfirmation(message)) {
-            removeTopic(topic_to_remove, op_user);
-        }
-
-    } else if (tokens[1] == "file") {
-
-        string file_to_remove = tokens[2];
-        string message = "Are you sure you want to remove file " + file_to_remove;
-
-        if (getConfirmation(message)) {
-            removeFile(file_to_remove, op_user);
-        }
-
     } else {
         displayHelp(tokens[0]);
     }

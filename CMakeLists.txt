@@ -18,4 +18,4 @@ add_executable(ConnectFS
         src/existence_ops.cpp
         headers/existence_ops.h
         src/copy_ops.cpp
-        headers/copy_ops.h src/load_ops.cpp headers/load_ops.h)
+        headers/copy_ops.h src/load_ops.cpp headers/load_ops.h src/help_ops.cpp headers/help_ops.h)

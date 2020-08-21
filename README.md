@@ -57,8 +57,10 @@ After running the cmake command, compile the source code using the following.
 
 `make`
 
-If all goes well, you should have an executable file named ConnectFS in your local repo folder now. Before starting the application, create a folder named `data` in the same folder as your executable. 
-This folder will hold the application's permanent graph database storage files.
+If all goes well, you should have an executable file named ConnectFS in your local repository now. 
+Notice that the repo also includes a folder named `data` that contains a file named `Users`.
+The `data` folder will hold the permanent storage files of the application's graph database. Deleting 
+this folder would delete the contents of your ConnectFS file system, so be careful with how you handle it.
 
 ## Shell Documentation
 

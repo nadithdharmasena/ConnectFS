@@ -1,6 +1,3 @@
-//
-// Created by Nadith Dharmasena on 8/20/20.
-//
 
 #ifndef CONNECTFS_LOAD_OPS_H
 #define CONNECTFS_LOAD_OPS_H
